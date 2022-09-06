@@ -19,9 +19,9 @@ endif
 
 .PHONY: build-image
 build-image: Dockerfile.builder $(GOARCHIVE)
-	docker build -t hellofastcgi-builder -f Dockerfile.builder .
+	docker build --platform linux/amd64 -t ghcr.io/piperswe/hellofastcgi/builder -f Dockerfile.builder .
 
-INDOCKER=docker run --rm --mount type=bind,source="$$(pwd)",target=/app hellofastcgi-builder
+INDOCKER=docker run --rm --platform linux/amd64 --mount type=bind,source="$$(pwd)",target=/app ghcr.io/piperswe/hellofastcgi/builder
 
 .PHONY: bin/hellofastcgi.cgi
 bin/hellofastcgi.cgi: bin build-image
@@ -37,6 +37,10 @@ bin/.htaccess: .htaccess bin
 .PHONY: ssh
 ssh:
 	ssh dh_ptskzf@hellofastcgi.piperswe.me
+
+.PHONY: ssh-copy-id
+ssh-copy-id:
+	ssh-copy-id dh_ptskzf@hellofastcgi.piperswe.me
 
 .PHONY: deploy
 deploy: build
