@@ -21,11 +21,15 @@ func TestHelloWorldHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.Contains(t, rr.Body.String(), "Hello, world!")
+}
 
-	req, err = http.NewRequest("GET", "/hello/Piper", nil)
+func TestHelloWorldHandlerWithCustomWorld(t *testing.T) {
+	handler := CreateHandler()
+
+	req, err := http.NewRequest("GET", "/hello/Piper", nil)
 	require.NoError(t, err)
 
-	rr = httptest.NewRecorder()
+	rr := httptest.NewRecorder()
 
 	handler.ServeHTTP(rr, req)
 
