@@ -6,9 +6,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func SetupHandler() {
+func CreateHandler() http.Handler {
 	r := mux.NewRouter()
 	r.HandleFunc("/", helloWorldHandler)
 	r.HandleFunc("/hello/{world}", helloWorldHandler)
-	http.Handle("/", r)
+	return r
+}
+
+func SetupHandler() {
+	http.Handle("/", CreateHandler())
 }

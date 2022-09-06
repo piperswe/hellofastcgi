@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/piperswe/hellofastcgi/internal/hello"
 )
 
 func helloWorldHandler(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +17,8 @@ func helloWorldHandler(w http.ResponseWriter, r *http.Request) {
 	if ok {
 		world = newWorld
 	}
-	fmt.Fprintf(w, "Hello, %s! Request URL is %#v.\n\nHeaders:\n", world, r.URL.String())
+	fmt.Fprintln(w, hello.Hello(world))
+	fmt.Fprintf(w, "Request URL is %#v.\n\nHeaders:\n", r.URL.String())
 	for headerName, headerValue := range r.Header {
 		fmt.Fprintf(w, "%#v: %#v\n", headerName, headerValue)
 	}

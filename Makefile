@@ -1,6 +1,10 @@
 .PHONY: build
 build: bin/hellofastcgi.cgi bin/hellofastcgi.fcgi bin/.htaccess
 
+.PHONY: test
+test:
+	go test ./...
+
 .PHONY: dev
 dev:
 	go run -mod=vendor ./cmd/dev
@@ -18,8 +22,8 @@ ifeq ("$(wildcard $(GOARCHIVE))","")
 endif
 
 .PHONY: build-image
-build-image: Dockerfile.builder $(GOARCHIVE)
-	docker build --platform linux/amd64 -t ghcr.io/piperswe/hellofastcgi/builder -f Dockerfile.builder .
+build-image: Dockerfile $(GOARCHIVE)
+	docker build --platform linux/amd64 -t ghcr.io/piperswe/hellofastcgi/builder -f Dockerfile .
 
 INDOCKER=docker run --rm --platform linux/amd64 --mount type=bind,source="$$(pwd)",target=/app ghcr.io/piperswe/hellofastcgi/builder
 
@@ -43,7 +47,7 @@ ssh-copy-id:
 	ssh-copy-id dh_ptskzf@hellofastcgi.piperswe.me
 
 .PHONY: deploy
-deploy: build
+deploy: build test
 	rsync -vrP --delete bin/ dh_ptskzf@hellofastcgi.piperswe.me:hellofastcgi.piperswe.me
 
 .PHONY: deploy-debug
