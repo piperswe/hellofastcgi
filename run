@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+command="$1"
+shift
+exec nix run '.#'"$command" -- "$@"

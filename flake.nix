@@ -3,7 +3,6 @@
     let
       dynamicPkgs = nixpkgs.legacyPackages.${system};
       pkgs = dynamicPkgs.pkgsStatic;
-      crossPkgs = dynamicPkgs.pkgsCross.musl64.pkgsStatic;
       genPackages = pkgs: rec {
         hellofastcgi = pkgs.buildGoModule {
           name = "hellofastcgi";
@@ -26,7 +25,6 @@
 
         default = hellofastcgi;
       };
-      crossPackages = genPackages crossPkgs;
       dynamicPackages = genPackages dynamicPkgs;
     in
     rec {
@@ -36,7 +34,7 @@
         drv = dynamicPkgs.writeShellScriptBin "deploy" ''
           set -euxo pipefail
           export PATH="${nixpkgs.lib.makeBinPath [ dynamicPkgs.rsync dynamicPkgs.openssh ]}"
-          rsync -vrPL --delete ${crossPackages.production}/ dh_ptskzf@hellofastcgi.piperswe.me:hellofastcgi.piperswe.me
+          rsync -vrPL --delete ${self.packages.x86_64-linux.production}/ dh_ptskzf@hellofastcgi.piperswe.me:hellofastcgi.piperswe.me
         '';
       };
 
@@ -44,7 +42,7 @@
         drv = dynamicPkgs.writeShellScriptBin "deploy-debug" ''
           set -euxo pipefail
           export PATH="${nixpkgs.lib.makeBinPath [ dynamicPkgs.rsync dynamicPkgs.openssh ]}"
-          rsync -vrPL --delete ${crossPackages.debug}/ dh_ptskzf@hellofastcgi.piperswe.me:hellofastcgi.piperswe.me
+          rsync -vrPL --delete ${self.packages.x86_64-linux.debug}/ dh_ptskzf@hellofastcgi.piperswe.me:hellofastcgi.piperswe.me
         '';
       };
 
@@ -63,6 +61,14 @@
 
       apps.go = flake-utils.lib.mkApp {
         drv = dynamicPackages.hellofastcgi.go;
+      };
+
+      apps.dev-fast = flake-utils.lib.mkApp {
+        drv = dynamicPkgs.writeShellScriptBin "dev-fast" ''
+          set -euxo pipefail
+          export PATH="${nixpkgs.lib.makeBinPath [ dynamicPackages.hellofastcgi.go ]}"
+          exec go run ./cmd/dev
+        '';
       };
 
       apps.default = apps.dev;
